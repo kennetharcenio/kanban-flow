@@ -1,0 +1,34 @@
+@use 'variables' as *;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: $font-stack;
+  background: $bg-primary;
+  color: $text-primary;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $bg-hover;
+  border-radius: $radius-full;
+}
+
+a {
+  color: $accent-primary;
+  text-decoration: none;
+}
