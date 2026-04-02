@@ -1,0 +1,30 @@
+@use '../styles/variables' as *;
+
+.login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: $bg-primary;
+}
+
+.login-card {
+  text-align: center;
+  padding: 48px;
+  background: $bg-secondary;
+  border-radius: $radius-lg;
+  border: 1px solid $border-secondary;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: 700;
+  color: $text-primary;
+  margin-bottom: 12px;
+}
+
+.tagline {
+  font-size: 14px;
+  color: $text-muted;
+  margin-bottom: 32px;
+}
