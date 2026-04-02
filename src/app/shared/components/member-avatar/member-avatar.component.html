@@ -1,0 +1,7 @@
+<div class="avatar" [ngStyle]="styles">
+  @if (avatar) {
+    <img [src]="avatar" [alt]="name" />
+  } @else {
+    {{ initials }}
+  }
+</div>

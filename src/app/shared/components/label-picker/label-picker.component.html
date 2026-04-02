@@ -1,0 +1,8 @@
+<div class="label-list">
+  @for (label of labels; track label.id) {
+    <div class="label-item" [class.selected]="isSelected(label.id)" (click)="toggle(label.id)">
+      <div class="label-dot" [style.background]="label.color"></div>
+      <span class="label-name">{{ label.name }}</span>
+    </div>
+  }
+</div>
