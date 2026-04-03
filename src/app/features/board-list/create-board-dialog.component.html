@@ -1,0 +1,15 @@
+<h2 mat-dialog-title>Create New Board</h2>
+<mat-dialog-content>
+  <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 8px;">
+    <mat-label>Board Name</mat-label>
+    <input matInput [(ngModel)]="name" placeholder="e.g., Project Alpha" autofocus />
+  </mat-form-field>
+  <mat-form-field appearance="outline" style="width: 100%;">
+    <mat-label>Description (optional)</mat-label>
+    <textarea matInput [(ngModel)]="description" rows="2"></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="dialogRef.close()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="create()" [disabled]="!name.trim()">Create</button>
+</mat-dialog-actions>
