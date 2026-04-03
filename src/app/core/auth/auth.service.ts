@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import { environment } from '../../../environments/environment';
 
 export interface UserProfile {
@@ -21,9 +21,13 @@ export class AuthService {
   private user = signal<UserProfile | null>(null);
   private tokenClient: any = null;
 
-  isAuthenticated(): boolean {
-    return this.accessToken() !== null && Date.now() < this.tokenExpiresAt();
+  devBypass(): void {
+    this.accessToken.set('dev-token');
+    this.tokenExpiresAt.set(Date.now() + 24 * 60 * 60 * 1000);
+    this.user.set({ email: 'dev@kanbanflow.local', name: 'Dev User', picture: '' });
   }
+
+  isAuthenticated = computed(() => this.accessToken() !== null && Date.now() < this.tokenExpiresAt());
 
   currentUser(): UserProfile | null {
     return this.user();

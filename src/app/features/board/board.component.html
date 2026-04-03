@@ -11,10 +11,6 @@
       </div>
     </div>
     <div class="header-right">
-      <span class="sync-status">
-        @if (sync.isSyncing()) { Syncing... }
-        @else if (sync.lastSyncTime()) { Synced ✓ }
-      </span>
       <div class="member-list" *ngIf="board">
         @for (member of board.members; track member.email) {
           <app-member-avatar

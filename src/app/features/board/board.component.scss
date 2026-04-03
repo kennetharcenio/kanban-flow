@@ -92,10 +92,8 @@
 }
 
 .column {
-  min-width: 280px;
-  max-width: 320px;
-  width: 280px;
-  flex-shrink: 0;
+  flex: 1;
+  min-width: 200px;
   display: flex;
   flex-direction: column;
   max-height: calc(100vh - 84px);
@@ -158,14 +156,15 @@
 }
 
 .column--add {
-  min-width: 280px;
+  flex: 0 0 120px;
+  min-width: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px dashed $border-secondary;
   border-radius: $radius-lg;
   color: $text-dim;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
   min-height: 80px;

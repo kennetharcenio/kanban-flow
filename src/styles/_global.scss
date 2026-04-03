@@ -32,3 +32,12 @@ a {
   color: $accent-primary;
   text-decoration: none;
 }
+
+.mat-mdc-dialog-surface {
+  overflow: visible !important;
+}
+
+.mat-mdc-dialog-content {
+  padding: 16px 24px 0 !important;
+  overflow: visible !important;
+}

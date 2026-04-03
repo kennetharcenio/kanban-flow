@@ -27,7 +27,9 @@
 
     <mat-form-field appearance="outline" class="half-width">
       <mat-label>Due Date</mat-label>
-      <input matInput type="date" [(ngModel)]="dueDate" />
+      <input matInput [matDatepicker]="picker" [(ngModel)]="dueDateValue" [min]="minDate" readonly (click)="picker.open()" style="cursor: pointer;" />
+      <mat-datepicker-toggle matIconSuffix [for]="picker" />
+      <mat-datepicker #picker />
     </mat-form-field>
   </div>
 </mat-dialog-content>

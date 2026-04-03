@@ -3,10 +3,6 @@
   <header class="header">
     <div class="logo">⬡ KanbanFlow</div>
     <div class="header-right">
-      <span class="sync-status">
-        @if (sync.isSyncing()) { Syncing... }
-        @else if (sync.lastSyncTime()) { Synced ✓ }
-      </span>
       <button mat-icon-button [matMenuTriggerFor]="userMenu">
         <app-member-avatar
           [name]="auth.currentUser()?.name || ''"
@@ -22,31 +18,20 @@
 
   <!-- Content -->
   <main class="content">
-    @if (!folderConnected) {
-      <div class="setup-prompt">
-        <h2>Connect to Google Drive</h2>
-        <p>Choose how to get started:</p>
-        <div class="setup-actions">
-          <button mat-flat-button color="primary" (click)="setupFolder()">Create New Folder</button>
-          <button mat-stroked-button (click)="connectFolder()">Connect Existing Folder</button>
+    <div class="board-header">
+      <h2>Your Boards</h2>
+      <button mat-flat-button color="primary" (click)="openCreateDialog()">+ New Board</button>
+    </div>
+    <div class="board-grid">
+      @for (board of boards; track board.id) {
+        <div class="board-card" (click)="openBoard(board.id)">
+          <div class="board-name">{{ board.name }}</div>
+          <div class="board-desc">{{ board.description }}</div>
         </div>
+      }
+      <div class="board-card board-card--create" (click)="openCreateDialog()">
+        <span>+ Create Board</span>
       </div>
-    } @else {
-      <div class="board-header">
-        <h2>Your Boards</h2>
-        <button mat-flat-button color="primary" (click)="openCreateDialog()">+ New Board</button>
-      </div>
-      <div class="board-grid">
-        @for (board of boards; track board.id) {
-          <div class="board-card" (click)="openBoard(board.id)">
-            <div class="board-name">{{ board.name }}</div>
-            <div class="board-desc">{{ board.description }}</div>
-          </div>
-        }
-        <div class="board-card board-card--create" (click)="openCreateDialog()">
-          <span>+ Create Board</span>
-        </div>
-      </div>
-    }
+    </div>
   </main>
 </div>

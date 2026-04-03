@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,15 +8,17 @@ import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from 
 import { Subscription, combineLatest } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { MatDialog } from '@angular/material/dialog';
-import { SyncService } from '../../core/sync/sync.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { EventStoreService } from '../../core/event-store/event-store.service';
 import { Board, Column } from '../../shared/models/board.model';
 import { Card } from '../../shared/models/card.model';
+import { BoardSnapshot } from '../../shared/models/index.model';
+import { BoardEvent } from '../../shared/models/event.model';
 import { MemberAvatarComponent } from '../../shared/components/member-avatar/member-avatar.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CardDialogComponent, CardDialogData, CardDialogResult } from './card-dialog.component';
 import { MemberDialogComponent, MemberDialogData, MemberDialogResult } from './member-dialog.component';
+import { ColumnDialogComponent } from './column-dialog.component';
 
 export interface ColumnWithCards {
   column: Column;
@@ -43,26 +45,27 @@ export class BoardComponent implements OnInit, OnDestroy {
   loading = true;
   error: string | null = null;
 
+  private boardId: string | null = null;
   private subs = new Subscription();
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    public sync: SyncService,
     public auth: AuthService,
     private eventStore: EventStoreService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private cdr: ChangeDetectorRef
   ) {}
 
-  async ngOnInit(): Promise<void> {
-    const boardId = this.route.snapshot.paramMap.get('id');
-    if (!boardId) {
+  ngOnInit(): void {
+    this.boardId = this.route.snapshot.paramMap.get('id');
+    if (!this.boardId) {
       this.router.navigate(['/boards']);
       return;
     }
 
     try {
-      await this.sync.loadBoard(boardId);
+      this.loadBoardFromStorage(this.boardId);
       this.loading = false;
 
       const combined$ = combineLatest([
@@ -80,10 +83,10 @@ export class BoardComponent implements OnInit, OnDestroy {
               .filter((c) => c.columnId === col.id)
               .sort((a, b) => a.order - b.order),
           }));
+          this.cdr.markForCheck();
+          queueMicrotask(() => this.persistToStorage());
         })
       );
-
-      this.sync.startPolling();
     } catch (err: any) {
       this.loading = false;
       this.error = err.message || 'Failed to load board';
@@ -92,7 +95,29 @@ export class BoardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
-    this.sync.stopPolling();
+  }
+
+  private loadBoardFromStorage(boardId: string): void {
+    const raw = localStorage.getItem(`kanbanflow_board_${boardId}`);
+    if (!raw) throw new Error('Board not found');
+    const snapshot: BoardSnapshot = JSON.parse(raw);
+
+    // Snapshot is always up to date, no need to replay events
+    this.eventStore.initialize(snapshot.board, snapshot.cards, []);
+  }
+
+  private persistToStorage(): void {
+    if (!this.boardId) return;
+    const state = this.eventStore.getState();
+    const snapshot: BoardSnapshot = {
+      board: state.board,
+      cards: state.cards,
+      lastEventVersion: this.eventStore.getCurrentVersion(),
+      snapshotAt: new Date().toISOString(),
+      snapshotBy: this.auth.currentUser()?.email || '',
+    };
+    localStorage.setItem(`kanbanflow_board_${this.boardId}`, JSON.stringify(snapshot));
+    localStorage.setItem(`kanbanflow_events_${this.boardId}`, JSON.stringify(this.eventStore.getAllEvents()));
   }
 
   goBack(): void {
@@ -117,7 +142,7 @@ export class BoardComponent implements OnInit, OnDestroy {
         if (card.order !== i) {
           this.eventStore.dispatch('CARD_MOVED', {
             cardId: card.id,
-            columnId: targetColumn.id,
+            toColumnId: targetColumn.id,
             order: i,
           }, user.email);
         }
@@ -141,7 +166,7 @@ export class BoardComponent implements OnInit, OnDestroy {
         if (card.id !== movedCard.id && card.order !== i) {
           this.eventStore.dispatch('CARD_MOVED', {
             cardId: card.id,
-            columnId: targetColumn.id,
+            toColumnId: targetColumn.id,
             order: i,
           }, user.email);
         }
@@ -152,7 +177,7 @@ export class BoardComponent implements OnInit, OnDestroy {
         if (card.order !== i) {
           this.eventStore.dispatch('CARD_MOVED', {
             cardId: card.id,
-            columnId: card.columnId,
+            toColumnId: card.columnId,
             order: i,
           }, user.email);
         }
@@ -181,14 +206,18 @@ export class BoardComponent implements OnInit, OnDestroy {
       if (!user) return;
 
       this.eventStore.dispatch('CARD_CREATED', {
-        cardId: uuidv4(),
-        title: result.card.title,
-        description: result.card.description,
-        columnId: column.id,
-        order: cardCount,
-        assignee: result.card.assignee,
-        dueDate: result.card.dueDate,
-        labels: result.card.labels,
+        card: {
+          id: uuidv4(),
+          title: result.card.title,
+          description: result.card.description,
+          columnId: column.id,
+          order: cardCount,
+          assignee: result.card.assignee,
+          dueDate: result.card.dueDate,
+          labels: result.card.labels,
+          createdBy: user.email,
+          createdAt: new Date().toISOString(),
+        },
       }, user.email);
     });
   }
@@ -218,11 +247,13 @@ export class BoardComponent implements OnInit, OnDestroy {
       } else if (result.action === 'save') {
         this.eventStore.dispatch('CARD_UPDATED', {
           cardId: card.id,
-          title: result.card.title,
-          description: result.card.description,
-          assignee: result.card.assignee,
-          dueDate: result.card.dueDate,
-          labels: result.card.labels,
+          changes: {
+            title: result.card.title,
+            description: result.card.description,
+            assignee: result.card.assignee,
+            dueDate: result.card.dueDate,
+            labels: result.card.labels,
+          },
         }, user.email);
       }
     });
@@ -231,31 +262,37 @@ export class BoardComponent implements OnInit, OnDestroy {
   // --- Column management ---
 
   addColumn(): void {
-    const user = this.auth.currentUser();
-    if (!user) return;
-    const name = prompt('Column name:');
-    if (!name?.trim()) return;
+    const dialogRef = this.dialog.open(ColumnDialogComponent, { width: '360px' });
+    dialogRef.afterClosed().subscribe((name: string | undefined) => {
+      if (!name) return;
+      const user = this.auth.currentUser();
+      if (!user) return;
 
-    const order = this.columnsWithCards.length;
-    const colors = ['#94a3b8', '#60a5fa', '#f59e0b', '#4ade80', '#ec4899', '#6366f1'];
-    this.eventStore.dispatch('COLUMN_CREATED', {
-      columnId: uuidv4(),
-      name: name.trim(),
-      order,
-      color: colors[order % colors.length],
-    }, user.email);
+      const order = this.columnsWithCards.length;
+      const colors = ['#94a3b8', '#60a5fa', '#f59e0b', '#4ade80', '#ec4899', '#6366f1'];
+      this.eventStore.dispatch('COLUMN_CREATED', {
+        column: {
+          id: uuidv4(),
+          name,
+          order,
+          color: colors[order % colors.length],
+        },
+      }, user.email);
+    });
   }
 
   renameColumn(column: Column): void {
-    const user = this.auth.currentUser();
-    if (!user) return;
-    const name = prompt('New column name:', column.name);
-    if (!name?.trim() || name.trim() === column.name) return;
+    const dialogRef = this.dialog.open(ColumnDialogComponent, { width: '360px' });
+    dialogRef.afterClosed().subscribe((name: string | undefined) => {
+      if (!name || name === column.name) return;
+      const user = this.auth.currentUser();
+      if (!user) return;
 
-    this.eventStore.dispatch('COLUMN_UPDATED', {
-      columnId: column.id,
-      name: name.trim(),
-    }, user.email);
+      this.eventStore.dispatch('COLUMN_UPDATED', {
+        columnId: column.id,
+        changes: { name },
+      }, user.email);
+    });
   }
 
   changeColumnColor(column: Column): void {
@@ -267,7 +304,7 @@ export class BoardComponent implements OnInit, OnDestroy {
 
     this.eventStore.dispatch('COLUMN_UPDATED', {
       columnId: column.id,
-      color: nextColor,
+      changes: { color: nextColor },
     }, user.email);
   }
 
@@ -333,9 +370,11 @@ export class BoardComponent implements OnInit, OnDestroy {
 
       if (result.action === 'add') {
         this.eventStore.dispatch('MEMBER_ADDED', {
-          email: result.email,
-          name: result.name || result.email,
-          avatar: '',
+          member: {
+            email: result.email,
+            name: result.name || result.email,
+            avatar: '',
+          },
         }, user.email);
       } else if (result.action === 'remove') {
         this.eventStore.dispatch('MEMBER_REMOVED', {

@@ -1,13 +1,1 @@
-@if (auth.isAuthenticated()) {
-  <router-outlet />
-} @else {
-  <div class="login-screen">
-    <div class="login-card">
-      <div class="logo">⬡ KanbanFlow</div>
-      <p class="tagline">Collaborative Kanban boards, powered by Google Drive</p>
-      <button mat-flat-button color="primary" (click)="signIn()">
-        Sign in with Google
-      </button>
-    </div>
-  </div>
-}
+<router-outlet />

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { AuthService } from './core/auth/auth.service';
 import { MatButtonModule } from '@angular/material/button';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,10 @@ export class App implements OnInit {
   constructor(public auth: AuthService) {}
 
   ngOnInit(): void {
+    if (environment.devBypassAuth) {
+      this.auth.devBypass();
+      return;
+    }
     if (typeof google !== 'undefined') {
       this.auth.initializeGoogleAuth();
     }

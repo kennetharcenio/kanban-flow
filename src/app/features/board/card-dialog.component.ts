@@ -7,6 +7,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { Card } from '../../shared/models/card.model';
 import { Member } from '../../shared/models/board.model';
 
@@ -40,7 +42,9 @@ export interface CardDialogResult {
     MatButtonModule,
     MatSelectModule,
     MatIconModule,
+    MatDatepickerModule,
   ],
+  providers: [provideNativeDateAdapter()],
   templateUrl: './card-dialog.component.html',
   styleUrl: './card-dialog.component.scss',
 })
@@ -48,7 +52,8 @@ export class CardDialogComponent {
   title = '';
   description = '';
   assignee: string | null = null;
-  dueDate: string | null = null;
+  dueDateValue: Date | null = null;
+  minDate = new Date();
   labels: string[] = [];
 
   constructor(
@@ -59,7 +64,7 @@ export class CardDialogComponent {
       this.title = data.card.title;
       this.description = data.card.description;
       this.assignee = data.card.assignee;
-      this.dueDate = data.card.dueDate;
+      this.dueDateValue = data.card.dueDate ? new Date(data.card.dueDate) : null;
       this.labels = [...data.card.labels];
     }
   }
@@ -72,7 +77,7 @@ export class CardDialogComponent {
         title: this.title.trim(),
         description: this.description.trim(),
         assignee: this.assignee || null,
-        dueDate: this.dueDate || null,
+        dueDate: this.dueDateValue ? this.dueDateValue.toISOString().split('T')[0] : null,
         labels: this.labels,
       },
     } as CardDialogResult);

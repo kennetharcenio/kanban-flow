@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  devBypassAuth: true,
   googleClientId: 'YOUR_CLIENT_ID.apps.googleusercontent.com',
   googleApiKey: 'YOUR_API_KEY',
   driveScope: 'https://www.googleapis.com/auth/drive',
