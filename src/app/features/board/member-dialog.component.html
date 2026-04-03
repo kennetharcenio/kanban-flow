@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>Board Members</h2>
+
+<mat-dialog-content>
+  <div class="member-list">
+    @for (member of data.members; track member.email) {
+      <div class="member-row">
+        <app-member-avatar [name]="member.name" [avatar]="member.avatar" [size]="32" />
+        <div class="member-info">
+          <span class="member-name">{{ member.name }}</span>
+          <span class="member-email">{{ member.email }}</span>
+        </div>
+        @if (isCurrentUser(member)) {
+          <span class="member-badge">You</span>
+        } @else {
+          <button mat-icon-button (click)="removeMember(member)" class="remove-btn">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="add-section">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Add member by email</mat-label>
+      <input
+        matInput
+        [(ngModel)]="newEmail"
+        placeholder="name@example.com"
+        (keydown.enter)="addMember()"
+      />
+    </mat-form-field>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="dialogRef.close()">Close</button>
+  <button mat-flat-button color="primary" (click)="addMember()" [disabled]="!newEmail.trim()">
+    Add Member
+  </button>
+</mat-dialog-actions>

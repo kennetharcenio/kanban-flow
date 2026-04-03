@@ -1,0 +1,113 @@
+<div class="board-page">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button mat-icon-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="board-title" *ngIf="board">
+        <h1>{{ board.name }}</h1>
+        <span class="board-desc" *ngIf="board.description">{{ board.description }}</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="sync-status">
+        @if (sync.isSyncing()) { Syncing... }
+        @else if (sync.lastSyncTime()) { Synced ✓ }
+      </span>
+      <div class="member-list" *ngIf="board">
+        @for (member of board.members; track member.email) {
+          <app-member-avatar
+            [name]="member.name"
+            [avatar]="member.avatar"
+            [size]="28"
+          />
+        }
+      </div>
+      <button mat-icon-button (click)="openMemberDialog()" title="Manage members">
+        <mat-icon>person_add</mat-icon>
+      </button>
+      <button mat-icon-button [matMenuTriggerFor]="boardMenu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #boardMenu="matMenu">
+        <button mat-menu-item (click)="openMemberDialog()">Manage Members</button>
+        <button mat-menu-item (click)="goBack()">Back to Boards</button>
+      </mat-menu>
+    </div>
+  </header>
+
+  <!-- Loading / Error -->
+  @if (loading) {
+    <div class="state-message">Loading board...</div>
+  } @else if (error) {
+    <div class="state-message error">{{ error }}</div>
+  } @else {
+    <!-- Columns -->
+    <div class="columns-container">
+      @for (colWithCards of columnsWithCards; track colWithCards.column.id) {
+        <div class="column">
+          <div class="column-header">
+            <div class="column-title">
+              <span class="column-dot" [style.background]="colWithCards.column.color"></span>
+              <span class="column-name">{{ colWithCards.column.name }}</span>
+              <span class="column-count">{{ getColumnCardCount(colWithCards) }}</span>
+            </div>
+            <button mat-icon-button class="column-menu-btn" [matMenuTriggerFor]="colMenu">
+              <mat-icon>more_horiz</mat-icon>
+            </button>
+            <mat-menu #colMenu="matMenu">
+              <button mat-menu-item (click)="renameColumn(colWithCards.column)">Rename</button>
+              <button mat-menu-item (click)="changeColumnColor(colWithCards.column)">Change Color</button>
+              <button mat-menu-item (click)="moveColumnLeft(colWithCards.column)" [disabled]="$first">Move Left</button>
+              <button mat-menu-item (click)="moveColumnRight(colWithCards.column)" [disabled]="$last">Move Right</button>
+              <button mat-menu-item (click)="deleteColumn(colWithCards.column, getColumnCardCount(colWithCards))">Delete</button>
+            </mat-menu>
+          </div>
+
+          <div
+            class="card-list"
+            cdkDropList
+            [id]="'column-' + colWithCards.column.id"
+            [cdkDropListData]="colWithCards.cards"
+            [cdkDropListConnectedTo]="getColumnConnectedLists(colWithCards.column.id)"
+            (cdkDropListDropped)="dropCard($event, colWithCards.column)"
+          >
+            @for (card of colWithCards.cards; track card.id) {
+              <div class="card" cdkDrag (click)="openEditCardDialog(card, $event)">
+                <div class="card-labels" *ngIf="card.labels.length > 0">
+                  @for (label of card.labels; track label) {
+                    <span class="card-label">{{ label }}</span>
+                  }
+                </div>
+                <div class="card-title">{{ card.title }}</div>
+                <div class="card-meta">
+                  <span class="card-due" *ngIf="card.dueDate">{{ card.dueDate | date:'MMM d' }}</span>
+                  <app-member-avatar
+                    *ngIf="card.assignee"
+                    [name]="card.assignee"
+                    [size]="20"
+                  />
+                </div>
+
+                <!-- Drag placeholder -->
+                <div class="card-placeholder" *cdkDragPlaceholder></div>
+              </div>
+            }
+          </div>
+
+          <button
+            class="add-card-btn"
+            (click)="openCreateCardDialog(colWithCards.column, getColumnCardCount(colWithCards))"
+          >
+            + Add Card
+          </button>
+        </div>
+      }
+
+      <div class="column column--add" (click)="addColumn()">
+        <span>+ Add Column</span>
+      </div>
+    </div>
+  }
+</div>

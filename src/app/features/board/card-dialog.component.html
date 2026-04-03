@@ -1,0 +1,46 @@
+<h2 mat-dialog-title>
+  @if (data.mode === 'create') { New Card } @else { Edit Card }
+  <span class="column-badge">{{ data.columnName }}</span>
+</h2>
+
+<mat-dialog-content>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Title</mat-label>
+    <input matInput [(ngModel)]="title" placeholder="Card title" autofocus />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Description</mat-label>
+    <textarea matInput [(ngModel)]="description" rows="3" placeholder="Add details..."></textarea>
+  </mat-form-field>
+
+  <div class="field-row">
+    <mat-form-field appearance="outline" class="half-width">
+      <mat-label>Assignee</mat-label>
+      <mat-select [(ngModel)]="assignee">
+        <mat-option [value]="null">Unassigned</mat-option>
+        @for (member of data.members; track member.email) {
+          <mat-option [value]="member.email">{{ member.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="half-width">
+      <mat-label>Due Date</mat-label>
+      <input matInput type="date" [(ngModel)]="dueDate" />
+    </mat-form-field>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (data.mode === 'edit') {
+    <button mat-button color="warn" (click)="delete()" class="delete-btn">
+      <mat-icon>delete</mat-icon> Delete
+    </button>
+  }
+  <span class="spacer"></span>
+  <button mat-button (click)="dialogRef.close()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="save()" [disabled]="!title.trim()">
+    @if (data.mode === 'create') { Create } @else { Save }
+  </button>
+</mat-dialog-actions>

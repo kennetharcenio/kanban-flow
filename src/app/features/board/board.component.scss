@@ -1,0 +1,293 @@
+@use '../../../styles/variables' as *;
+
+.board-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+// Header
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid $border-primary;
+  background: $bg-primary;
+  min-height: 52px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.board-title {
+  min-width: 0;
+
+  h1 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.board-desc {
+  font-size: 12px;
+  color: $text-dim;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sync-status {
+  font-size: 12px;
+  color: $text-muted;
+}
+
+.member-list {
+  display: flex;
+  gap: -4px;
+
+  app-member-avatar {
+    margin-left: -4px;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+}
+
+// State messages
+.state-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: $text-muted;
+  font-size: 14px;
+
+  &.error {
+    color: $accent-danger;
+  }
+}
+
+// Columns
+.columns-container {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  overflow-x: auto;
+  padding: 16px;
+  align-items: flex-start;
+}
+
+.column {
+  min-width: 280px;
+  max-width: 320px;
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 84px);
+}
+
+.column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 4px;
+  margin-bottom: 8px;
+}
+
+.column-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.column-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: $radius-full;
+  flex-shrink: 0;
+}
+
+.column-name {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: $text-muted;
+}
+
+.column-count {
+  font-size: 12px;
+  color: $text-dim;
+  background: $bg-secondary;
+  padding: 0 6px;
+  border-radius: $radius-full;
+  line-height: 20px;
+}
+
+.column-menu-btn {
+  opacity: 0;
+  transition: opacity 0.15s;
+  width: 28px !important;
+  height: 28px !important;
+  line-height: 28px !important;
+
+  .mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.column:hover .column-menu-btn {
+  opacity: 1;
+}
+
+.column--add {
+  min-width: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed $border-secondary;
+  border-radius: $radius-lg;
+  color: $text-dim;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  min-height: 80px;
+
+  &:hover {
+    border-color: $text-muted;
+    color: $text-muted;
+  }
+}
+
+// Card list
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  padding: 2px;
+  min-height: 40px;
+  flex: 1;
+}
+
+// Cards
+.card {
+  background: $bg-secondary;
+  border: 1px solid $border-primary;
+  border-radius: $radius-md;
+  padding: 12px;
+  cursor: grab;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    border-color: $border-secondary;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.card-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.card-label {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: $radius-full;
+  background: $accent-primary;
+  color: white;
+  font-weight: 500;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: $text-primary;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  gap: 8px;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.card-due {
+  font-size: 11px;
+  color: $text-dim;
+}
+
+// Drag & drop
+.card-placeholder {
+  background: $bg-hover;
+  border: 2px dashed $border-secondary;
+  border-radius: $radius-md;
+  min-height: 40px;
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drag-preview {
+  background: $bg-secondary;
+  border: 1px solid $accent-primary;
+  border-radius: $radius-md;
+  padding: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.card-list.cdk-drop-list-dragging .card:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+// Add card button
+.add-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  border: none;
+  border-radius: $radius-md;
+  background: transparent;
+  color: $text-dim;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: $bg-secondary;
+    color: $text-muted;
+  }
+}
