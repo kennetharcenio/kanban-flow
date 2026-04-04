@@ -23,7 +23,7 @@
       <button mat-flat-button color="primary" (click)="openCreateDialog()">+ New Board</button>
     </div>
     <div class="board-grid">
-      @for (board of boards; track board.id) {
+      @for (board of boards(); track board.id) {
         <div class="board-card" (click)="openBoard(board.id)">
           <div class="board-name">{{ board.name }}</div>
           <div class="board-desc">{{ board.description }}</div>

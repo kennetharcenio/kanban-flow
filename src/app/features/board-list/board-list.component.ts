@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,7 +22,7 @@ const BOARDS_KEY = 'kanbanflow_boards';
   styleUrl: './board-list.component.scss',
 })
 export class BoardListComponent implements OnInit {
-  boards: BoardSummary[] = [];
+  boards = signal<BoardSummary[]>([]);
 
   constructor(
     public auth: AuthService,
@@ -36,11 +36,11 @@ export class BoardListComponent implements OnInit {
 
   private loadBoards(): void {
     const raw = localStorage.getItem(BOARDS_KEY);
-    this.boards = raw ? JSON.parse(raw) : [];
+    this.boards.set(raw ? JSON.parse(raw) : []);
   }
 
   private saveBoards(): void {
-    localStorage.setItem(BOARDS_KEY, JSON.stringify(this.boards));
+    localStorage.setItem(BOARDS_KEY, JSON.stringify(this.boards()));
   }
 
   openCreateDialog(): void {
@@ -93,7 +93,7 @@ export class BoardListComponent implements OnInit {
       createdBy: user?.email || 'dev@kanbanflow.local',
       createdAt: new Date().toISOString(),
     };
-    this.boards = [...this.boards, summary];
+    this.boards.set([...this.boards(), summary]);
     this.saveBoards();
   }
 
