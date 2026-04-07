@@ -9,10 +9,22 @@ describe('DriveService', () => {
   beforeEach(() => {
     authSpy = { getAccessToken: vi.fn().mockReturnValue('test-token') };
 
+    // Mock localStorage for test environment
+    const store: Record<string, string> = {};
+    vi.stubGlobal('localStorage', {
+      getItem: vi.fn((key: string) => store[key] ?? null),
+      setItem: vi.fn((key: string, value: string) => { store[key] = value; }),
+      removeItem: vi.fn((key: string) => { delete store[key]; }),
+    });
+
     TestBed.configureTestingModule({
       providers: [{ provide: AuthService, useValue: authSpy }],
     });
     service = TestBed.inject(DriveService);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('should be created', () => {
@@ -47,9 +59,5 @@ describe('DriveService', () => {
     });
     const freshService = TestBed.inject(DriveService);
     expect(freshService.getFolderId()).toBe('folder-789');
-  });
-
-  afterEach(() => {
-    localStorage.removeItem('kanbanflow_folder_id');
   });
 });

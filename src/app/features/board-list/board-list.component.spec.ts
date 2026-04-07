@@ -12,6 +12,14 @@ describe('BoardListComponent', () => {
   let fixture: ComponentFixture<BoardListComponent>;
 
   beforeEach(async () => {
+    // Mock localStorage for test environment
+    const store: Record<string, string> = {};
+    vi.stubGlobal('localStorage', {
+      getItem: vi.fn((key: string) => store[key] ?? null),
+      setItem: vi.fn((key: string, value: string) => { store[key] = value; }),
+      removeItem: vi.fn((key: string) => { delete store[key]; }),
+    });
+
     const syncSpy = {
       loadIndex: vi.fn().mockResolvedValue({ boards: [], labels: [], version: 0 }),
       saveIndex: vi.fn(),
@@ -48,12 +56,16 @@ describe('BoardListComponent', () => {
     component = fixture.componentInstance;
   });
 
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
   it('should load boards on init', async () => {
     await component.ngOnInit();
-    expect(component.boards).toEqual([]);
+    expect(component.boards()).toEqual([]);
   });
 });
