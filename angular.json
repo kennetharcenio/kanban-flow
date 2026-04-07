@@ -35,6 +35,7 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/kanban-flow/",
               "budgets": [
                 {
                   "type": "initial",

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npx ng:*)",
+      "Bash(gh repo:*)",
+      "Bash(npx angular-cli-ghpages:*)",
+      "Bash(gh api:*)",
+      "Bash(MSYS_NO_PATHCONV=1 npx ng build --base-href=/kanban-flow/)",
+      "Bash(xargs wc:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}
