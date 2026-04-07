@@ -1,0 +1,11 @@
+#!/bin/sh
+
+echo "Running tests before commit..."
+npx ng test --watch=false
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Commit blocked: tests failed or coverage thresholds not met."
+  echo "Fix the issues and try again."
+  exit 1
+fi
