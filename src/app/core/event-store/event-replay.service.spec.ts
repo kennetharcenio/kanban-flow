@@ -59,6 +59,20 @@ describe('EventReplayService', () => {
     expect(result.cards[0].order).toBe(0);
   });
 
+  it('should NOT move card when payload uses columnId instead of toColumnId (regression)', () => {
+    const existingCard: Card = {
+      id: 'card-1', title: 'Test', description: '', columnId: 'col-1',
+      order: 0, assignee: null, dueDate: null, labels: [],
+      createdBy: 'user@test.com', createdAt: '2026-04-03T00:00:00Z',
+    };
+    const event: BoardEvent = {
+      id: 'evt-bug', type: 'CARD_MOVED', version: 3, timestamp: 3000, userId: 'user@test.com',
+      payload: { cardId: 'card-1', columnId: 'col-2', order: 1 },
+    };
+    const result = service.replay({ board: emptyBoard, cards: [existingCard] }, [event]);
+    expect(result.cards[0].columnId).toBe('col-1');
+  });
+
   it('should apply CARD_UPDATED event', () => {
     const existingCard: Card = {
       id: 'card-1', title: 'Old Title', description: '', columnId: 'col-1',

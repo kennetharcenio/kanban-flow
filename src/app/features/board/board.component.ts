@@ -157,7 +157,7 @@ export class BoardComponent implements OnInit, OnDestroy {
       const movedCard = curr[event.currentIndex];
       this.eventStore.dispatch('CARD_MOVED', {
         cardId: movedCard.id,
-        columnId: targetColumn.id,
+        toColumnId: targetColumn.id,
         order: event.currentIndex,
       }, user.email);
 

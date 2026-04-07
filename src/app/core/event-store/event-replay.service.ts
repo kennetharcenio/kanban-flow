@@ -32,7 +32,7 @@ export class EventReplayService {
       case 'CARD_MOVED': {
         const cards = state.cards.map((c) =>
           c.id === event.payload['cardId']
-            ? { ...c, columnId: event.payload['toColumnId'], order: event.payload['order'] }
+            ? { ...c, columnId: event.payload['toColumnId'] ?? c.columnId, order: event.payload['order'] }
             : c
         );
         return { ...state, cards };
