@@ -1,6 +1,10 @@
-import { createMockBoard, createMockCard, createMockColumn, createMockEvent } from './mock-factories';
+import { createMockBoard, createMockCard, createMockColumn, createMockEvent, resetEventVersionCounter } from './mock-factories';
 
 describe('Mock Factories', () => {
+  beforeEach(() => {
+    resetEventVersionCounter();
+  });
+
   describe('createMockBoard', () => {
     it('should return a valid Board with defaults', () => {
       const board = createMockBoard();
